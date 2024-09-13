@@ -15,3 +15,6 @@ select = ["ALL"]
 
 [tool.ruff]
 line-length = 120
+
+[tool.ruff.per-file-ignores]
+"FIAT_GUI/callbacks.py" = ["ARG001", "ANN001", "RUF015", "D103"]

@@ -170,16 +170,59 @@ model_config_form = html.Div(
             [
                 dbc.Accordion(
                     [
-                        dbc.AccordionItem(output, title="Output"),
-                        dbc.AccordionItem(hazard, title="Hazard"),
-                        dbc.AccordionItem(exposure, title="Exposure"),
-                        dbc.AccordionItem(vulnerability, title="Vulnerability"),
+                        dbc.AccordionItem(
+                            output,
+                            title=html.P("Output", style={"fontWeight": "bold", "color": FONT_COLOR}),
+                        ),
+                        dbc.AccordionItem(
+                            hazard,
+                            title=html.P("Hazard", style={"fontWeight": "bold", "color": FONT_COLOR}),
+                        ),
+                        dbc.AccordionItem(
+                            exposure,
+                            title=html.P("Exposure", style={"fontWeight": "bold", "color": FONT_COLOR}),
+                        ),
+                        dbc.AccordionItem(
+                            vulnerability,
+                            title=html.P("Vulnerability", style={"fontWeight": "bold", "color": FONT_COLOR}),
+                        ),
                     ],
                 ),
             ],
+            style={"maxHeight": "60vh", "overflow": "auto"},
+        ),
+        html.Hr(style={"color": FONT_COLOR}),
+        dbc.Row(
+            dbc.Col(dbc.Button("Run model", id="model-run-btn", style={"backgroundColor": FONT_COLOR})),
+            style={"float": "right"},
+            className="mb-3",
         ),
     ],
     style={"padding": "1rem"},
+    id="model-config-form",
+)
+
+model_run_window = html.Div(
+    [
+        html.H2("Model run log", style={"color": FONT_COLOR, "textAlign": "center"}),
+        html.Hr(style={"color": FONT_COLOR}),
+        dbc.Textarea(
+            id="model-log",
+            readOnly=True,
+            style={
+                "height": "60vh",
+                "margin": "auto",
+                "padding": "1rem",
+            },
+        ),
+        dbc.Row(
+            dbc.Col(dbc.Button("Back", id="model-back-btn", style={"backgroundColor": FONT_COLOR})),
+            style={"float": "left", "paddingTop": "1rem"},
+            className="mb-3",
+        ),
+    ],
+    id="model-run-window",
+    style={"padding": "1rem", "display": "none"},
 )
 
 content_box = dbc.Row(
@@ -188,7 +231,7 @@ content_box = dbc.Row(
         dbc.Col(
             [
                 html.Div(
-                    [model_config_form],
+                    [model_config_form, model_run_window],
                     style={
                         "height": "100%",
                         "width": "100%",
