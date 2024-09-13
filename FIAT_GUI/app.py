@@ -1,7 +1,17 @@
-from FIAT_GUI.layout import layout
+"""The app."""
+
+import dash_bootstrap_components as dbc
 from dash import Dash
 
-app = Dash()
+from FIAT_GUI.layout import layout
+
+app = Dash(
+    "FIAT GUI",
+    external_stylesheets=[
+        dbc.themes.BOOTSTRAP,
+        dbc.icons.BOOTSTRAP,
+    ],
+)
 
 app.layout = layout
 

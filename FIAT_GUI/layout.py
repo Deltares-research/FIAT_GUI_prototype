@@ -1,12 +1,20 @@
-import dash_bootstrap_components as dbc
+"""Module containing the layout of the app."""
 
+import dash_bootstrap_components as dbc
 
 nav_bar = dbc.Navbar(
     [
         dbc.Row(
             [
                 dbc.Col(
-                    dbc.NavbarBrand("HydroMT Dashboard", style={"paddingLeft": "1rem"}),
+                    dbc.NavbarBrand(
+                        "FIAT GUI",
+                        style={
+                            "paddingLeft": "1rem",
+                            "color": "#080C80",
+                            "fontWeight": "bold",
+                        },
+                    ),
                     width=4,
                 ),
                 dbc.Col(
@@ -15,9 +23,9 @@ nav_bar = dbc.Navbar(
                         id="help-button",
                         style={
                             "float": "right",
-                            "backgroundColor": "#080C80",
-                            "borderColor": "white",
-                            "color": "white",
+                            "backgroundColor": "white",
+                            "borderColor": "#080C80",
+                            "color": "#080C80",
                         },
                         outline=True,
                         className="me-1",
@@ -29,9 +37,7 @@ nav_bar = dbc.Navbar(
             style={"width": "100%"},
         ),
     ],
-    color="#080C80",
-    # fluid=True,
-    # links_left=True,
+    color="white",
     dark=True,
     expand="lg",
     style={
