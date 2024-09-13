@@ -51,6 +51,11 @@ nav_bar = dbc.Navbar(
     },
 )
 
+
+def file_dialog_btn(id: str) -> dbc.Button:
+    return dbc.Button(id=id, style={"backgroundColor": "white", "borderColor": "white"})
+
+
 output = dbc.Form(
     [
         dbc.Row(
