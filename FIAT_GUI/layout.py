@@ -5,6 +5,31 @@ from dash import html
 
 FONT_COLOR = "#080C80"
 
+
+user_agreement_modal = html.Div(
+    [
+        dbc.Modal(
+            [
+                dbc.ModalHeader(dbc.ModalTitle("User agreement"), close_button=False),
+                dbc.ModalBody(
+                    [
+                        html.P(
+                            """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam augue sapien, scelerisque ac nibh quis, interdum aliquet neque. Aenean vel metus venenatis libero tristique iaculis sit amet at nunc. Fusce nec augue luctus, sollicitudin nulla et, placerat risus. Duis posuere quam ornare ante consectetur, et convallis velit bibendum. Nunc ligula enim, vestibulum finibus metus vel, porttitor varius augue. Ut et luctus ligula, vitae scelerisque erat. Cras at molestie orci. Fusce cursus nunc facilisis, aliquet arcu vitae, vulputate odio."""
+                        ),
+                        html.P(
+                            """Pellentesque eu euismod diam. Pellentesque vitae gravida ante. Integer maximus sit amet diam ac tempus. Donec vitae tincidunt ante. Aenean blandit tincidunt ornare. Mauris a massa gravida, lobortis metus at, mollis purus. Nam sit amet felis urna. In hac habitasse platea dictumst. Fusce pulvinar tempor enim, lobortis sollicitudin augue pulvinar ut. Nunc lobortis hendrerit dui, ac volutpat sapien tristique ac. Aenean massa magna, viverra sit amet scelerisque eget, pharetra sed arcu. Nunc vitae mollis risus. Morbi non porta tortor."""
+                        ),
+                    ],
+                ),
+                dbc.ModalFooter(dbc.Button("I agree", style={"backgroundColor": FONT_COLOR}, id="user-agreement-btn")),
+            ],
+            is_open=True,
+            backdrop="static",
+            id="user-agreement-modal",
+        )
+    ]
+)
+
 nav_bar = dbc.Navbar(
     [
         dbc.Row(
@@ -272,4 +297,4 @@ content_box = dbc.Row(
     style={"height": "80vh", "width": "100%"},
 )
 
-layout = [nav_bar, html.Br(), content_box]
+layout = [user_agreement_modal, nav_bar, html.Br(), content_box]

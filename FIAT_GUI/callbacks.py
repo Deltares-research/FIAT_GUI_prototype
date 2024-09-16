@@ -10,6 +10,17 @@ from FIAT_GUI.utils import file_dialog
 
 
 @callback(
+    Output("user-agreement-modal", "is_open"),
+    Input("user-agreement-btn", "n_clicks"),
+    State("user-agreement-modal", "is_open"),
+)
+def toggle_user_agreement(n_clicks, is_open):
+    if n_clicks:
+        return not is_open
+    return is_open
+
+
+@callback(
     Output("model-config-form", "style"),
     Output("model-run-window", "style"),
     Input("model-run-btn", "n_clicks"),
