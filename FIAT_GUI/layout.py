@@ -53,7 +53,13 @@ nav_bar = dbc.Navbar(
 
 
 def file_dialog_btn(id: str) -> dbc.Button:
-    return dbc.Button(id=id, style={"backgroundColor": "white", "borderColor": "white"})
+    return dbc.Button(
+        [
+            html.I(className="bi bi-folder2"),
+        ],
+        id=id,
+        style={"backgroundColor": "white", "borderColor": "black", "color": "black"},
+    )
 
 
 output = dbc.Form(
@@ -61,7 +67,8 @@ output = dbc.Form(
         dbc.Row(
             [
                 dbc.Label("Path", html_for="model-output-path", width=2),
-                dbc.Col(dbc.Input(id="model-output-path", type="text", placeholder="Enter output path"), width=10),
+                dbc.Col(dbc.Input(id="model-output-path", type="text", placeholder="Enter output path"), width=9),
+                dbc.Col(file_dialog_btn(id="output-filedialog-btn")),
             ],
             className="mb-3",
         ),
@@ -69,8 +76,10 @@ output = dbc.Form(
             [
                 dbc.Label("Output CSV", html_for="model-output-csv", width=2),
                 dbc.Col(
-                    dbc.Input(id="model-output-csv", type="text", placeholder="Enter output CSV path (optional)"),
-                    width=10,
+                    dbc.Input(
+                        id="model-output-csv", type="text", placeholder="Enter name of output CSV file (optional)"
+                    ),
+                    width=9,
                 ),
             ],
             className="mb-3",
@@ -79,8 +88,10 @@ output = dbc.Form(
             [
                 dbc.Label("Output geom", html_for="model-output-geom", width=2),
                 dbc.Col(
-                    dbc.Input(id="model-output-geom", type="text", placeholder="Enter output geom path(s) (optional)"),
-                    width=10,
+                    dbc.Input(
+                        id="model-output-geom", type="text", placeholder="Enter name(s) of output geometry (optional)"
+                    ),
+                    width=9,
                 ),
             ],
             className="mb-3",
@@ -89,8 +100,8 @@ output = dbc.Form(
             [
                 dbc.Label("Output grid", html_for="model-output-grid", width=2),
                 dbc.Col(
-                    dbc.Input(id="model-output-grid", type="text", placeholder="Enter output grid path (optional)"),
-                    width=10,
+                    dbc.Input(id="model-output-grid", type="text", placeholder="Enter name of output grid (optional)"),
+                    width=9,
                 ),
             ],
             className="mb-3",
@@ -103,7 +114,8 @@ hazard = dbc.Form(
         dbc.Row(
             [
                 dbc.Label("File", html_for="model-hazard-file", width=2),
-                dbc.Col(dbc.Input(id="model-hazard-file", type="text", placeholder="Enter hazard file path"), width=10),
+                dbc.Col(dbc.Input(id="model-hazard-file", type="text", placeholder="Enter hazard file path"), width=9),
+                dbc.Col(file_dialog_btn(id="hazard-file-filedialog-btn")),
             ],
             className="mb-3",
         ),
@@ -116,8 +128,9 @@ hazard = dbc.Form(
                         type="text",
                         placeholder="Enter hazard elevation reference path",
                     ),
-                    width=10,
+                    width=9,
                 ),
+                dbc.Col(file_dialog_btn(id="hazard-elev-ref-filedialog-btn")),
             ],
             className="mb-3",
         ),
@@ -139,15 +152,19 @@ exposure = dbc.Form(
                 dbc.Label("Exposure geom", html_for="model-exposure-geom", width=2),
                 dbc.Col(
                     dbc.Input(id="model-exposure-geom", type="text", placeholder="Enter exposure geom path(s)"),
-                    width=10,
+                    width=9,
                 ),
+                dbc.Col(file_dialog_btn(id="exposure-geom-filedialog-btn")),
             ],
             className="mb-3",
         ),
         dbc.Row(
             [
                 dbc.Label("Exposure CSV", html_for="model-exposure-csv", width=2),
-                dbc.Col(dbc.Input(id="model-exposure-csv", type="text", placeholder="Enter exposure CSV path")),
+                dbc.Col(
+                    dbc.Input(id="model-exposure-csv", type="text", placeholder="Enter exposure CSV path"), width=9
+                ),
+                dbc.Col(file_dialog_btn(id="exposure-csv-filedialog-btn")),
             ],
             className="mb-3",
         ),
@@ -160,7 +177,9 @@ vulnerability = dbc.Form(
                 dbc.Label("Vulnerability file", html_for="model-vulnerability-file", width=2),
                 dbc.Col(
                     dbc.Input(id="model-vulnerability-file", type="text", placeholder="Enter vulnerability file path"),
+                    width=9,
                 ),
+                dbc.Col(file_dialog_btn(id="vulnerability-file-filedialog-btn")),
             ],
             className="mb-3",
         ),
