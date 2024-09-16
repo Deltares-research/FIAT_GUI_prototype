@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import io
 import logging
-import subprocess
+from pathlib import Path
 
+import subprocess
 from dash import Input, Output, State, callback, callback_context
 from dash.exceptions import PreventUpdate
 
@@ -35,14 +36,14 @@ def toggle_user_agreement(n_clicks, is_open):
 @callback(
     Output("model-config-form", "style"),
     Output("model-run-window", "style"),
-    Input("model-run-btn", "n_clicks"),
+    Input("next-btn", "n_clicks"),
     Input("model-back-btn", "n_clicks"),
     State("model-config-form", "style"),
     State("model-run-window", "style"),
 )
-def toggle_content(run_btn, back_btn, config_form_style: dict, run_window_style: dict) -> list[dict, dict]:
+def toggle_content(next_btn, back_btn, config_form_style: dict, run_window_style: dict) -> list[dict, dict]:
     changed_id = [p["prop_id"] for p in callback_context.triggered][0]
-    if "model-run-btn" in changed_id:
+    if "next-btn" in changed_id:
         config_form_style.update({"display": "none"})
         run_window_style.update({"display": "block"})
     elif "model-back-btn" in changed_id:
@@ -131,7 +132,7 @@ def model_vulnerability_file_fd(fd_btn):
 
 @callback(
     Output("model-log-interval", "disabled"),
-    Input("model-run-btn", "n_clicks"),
+    Input("next-btn", "n_clicks"),
     State("model-output-path", "value"),
     State("model-output-csv", "value"),
     State("model-output-geom", "value"),
@@ -143,8 +144,8 @@ def model_vulnerability_file_fd(fd_btn):
     State("model-exposure-csv", "value"),
     State("model-vulnerability-file", "value"),
 )
-def run_model(
-    run_btn,
+def create_toml(
+    next_btn,
     ouput_path,
     output_csv,
     output_geom,
@@ -157,8 +158,8 @@ def run_model(
     vulnerability_file,
 ):
     changed_id = [p["prop_id"] for p in callback_context.triggered][0]
-    if "model-run-btn" in changed_id:
-        toml_file = create_fiat_toml(
+    if "next-btn" in changed_id:
+        create_fiat_toml(
             ouput_path=ouput_path,
             output_csv=output_csv,
             output_geom=output_geom,
@@ -170,7 +171,6 @@ def run_model(
             exposure_csv=exposure_csv,
             vulnerability_file=vulnerability_file,
         )
-        subprocess.run(["fiat", "run", toml_file, "-v"])
         return False
     raise PreventUpdate
 
@@ -179,10 +179,11 @@ def run_model(
     Output("model-log", "value"),
     Output("js-log", "run"),
     Input("model-log-interval", "n_intervals"),
+    Input("model-run-btn", "n_clicks"),
     State("model-log-interval", "disabled"),
     State("model-log", "value"),
 )
-def stream_model_log(n_intervals, model_log_disabled, model_log):
+def stream_model_log(n_intervals, run_btn, model_log_disabled, model_log):
     if n_intervals and not model_log_disabled:
         js = """
         var textarea = document.getElementById('model-log');
@@ -190,4 +191,19 @@ def stream_model_log(n_intervals, model_log_disabled, model_log):
         """
 
         return log_capture_string.getvalue(), js
+
+    raise PreventUpdate
+
+
+@callback(
+    Output("model-run-alert", "is_open"),
+    Input("model-run-btn", "n_clicks"),
+    State("model-output-path", "value"),
+)
+def run_model(n_clicks, output_path):
+    changed_id = [p["prop_id"] for p in callback_context.triggered][0]
+    if "model-run-btn" in changed_id:
+        model_config_path = output_path + "/model_config.toml"
+        subprocess.run(["fiat", "run", model_config_path, "-v"], shell=True)
+        return True
     raise PreventUpdate

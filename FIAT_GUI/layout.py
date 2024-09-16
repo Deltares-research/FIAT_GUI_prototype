@@ -258,7 +258,7 @@ model_config_form = html.Div(
         ),
         html.Hr(style={"color": FONT_COLOR}),
         dbc.Row(
-            dbc.Col(dbc.Button("Run model", id="model-run-btn", style={"backgroundColor": FONT_COLOR})),
+            dbc.Col(dbc.Button("Next", id="next-btn", style={"backgroundColor": FONT_COLOR})),
             style={"float": "right"},
             className="mb-3",
         ),
@@ -281,10 +281,23 @@ model_run_window = html.Div(
             },
         ),
         dbc.Row(
-            dbc.Col(dbc.Button("Back", id="model-back-btn", style={"backgroundColor": FONT_COLOR})),
-            style={"float": "left", "paddingTop": "1rem"},
+            [
+                dbc.Col(
+                    dbc.Button("Back", id="model-back-btn", style={"backgroundColor": FONT_COLOR, "float": "left"}),
+                    width=3,
+                ),
+                dbc.Col(
+                    dbc.Button(
+                        "Run model", id="model-run-btn", style={"backgroundColor": FONT_COLOR, "float": "right"}
+                    ),
+                    width=3,
+                ),
+            ],
+            style={"paddingTop": "1rem"},
             className="mb-3",
+            justify="around",
         ),
+        dbc.Alert("model run started", id="model-run-alert", duration=5000),
         dcc.Interval(id="model-log-interval", disabled=True),
         visdcc.Run_js(id="js-log", run=""),
     ],
