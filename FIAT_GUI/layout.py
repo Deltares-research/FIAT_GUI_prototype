@@ -1,7 +1,8 @@
 """Module containing the layout of the app."""
 
 import dash_bootstrap_components as dbc
-from dash import html
+import visdcc
+from dash import dcc, html
 
 FONT_COLOR = "#080C80"
 
@@ -14,10 +15,21 @@ user_agreement_modal = html.Div(
                 dbc.ModalBody(
                     [
                         html.P(
-                            """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam augue sapien, scelerisque ac nibh quis, interdum aliquet neque. Aenean vel metus venenatis libero tristique iaculis sit amet at nunc. Fusce nec augue luctus, sollicitudin nulla et, placerat risus. Duis posuere quam ornare ante consectetur, et convallis velit bibendum. Nunc ligula enim, vestibulum finibus metus vel, porttitor varius augue. Ut et luctus ligula, vitae scelerisque erat. Cras at molestie orci. Fusce cursus nunc facilisis, aliquet arcu vitae, vulputate odio."""
+                            """Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam augue sapien, scelerisque ac
+                             nibh quis, interdum aliquet neque. Aenean vel metus venenatis libero tristique iaculis sit
+                             amet at nunc. Fusce nec augue luctus, sollicitudin nulla et, placerat risus. Duis posuere
+                              quam ornare ante consectetur, et convallis velit bibendum. Nunc ligula enim, vestibulum
+                               finibus metus vel, porttitor varius augue. Ut et luctus ligula, vitae scelerisque erat.
+                                Cras at molestie orci. Fusce cursus nunc facilisis, aliquet arcu vitae, vulputate
+                                odio.""",
                         ),
                         html.P(
-                            """Pellentesque eu euismod diam. Pellentesque vitae gravida ante. Integer maximus sit amet diam ac tempus. Donec vitae tincidunt ante. Aenean blandit tincidunt ornare. Mauris a massa gravida, lobortis metus at, mollis purus. Nam sit amet felis urna. In hac habitasse platea dictumst. Fusce pulvinar tempor enim, lobortis sollicitudin augue pulvinar ut. Nunc lobortis hendrerit dui, ac volutpat sapien tristique ac. Aenean massa magna, viverra sit amet scelerisque eget, pharetra sed arcu. Nunc vitae mollis risus. Morbi non porta tortor."""
+                            """Pellentesque eu euismod diam. Pellentesque vitae gravida ante. Integer maximus sit amet
+                            diam ac tempus. Donec vitae tincidunt ante. Aenean blandit tincidunt ornare. Mauris a massa
+                            gravida, lobortis metus at, mollis purus. Nam sit amet felis urna. In hac habitasse platea
+                            dictumst. Fusce pulvinar tempor enim, lobortis sollicitudin augue pulvinar ut. Nunc lobortis
+                            hendrerit dui, ac volutpat sapien tristique ac. Aenean massa magna, viverra sit amet
+                            scelerisque eget, pharetra sed arcu. Nunc vitae mollis risus. Morbi non porta tortor.""",
                         ),
                     ],
                 ),
@@ -26,8 +38,8 @@ user_agreement_modal = html.Div(
             is_open=True,
             backdrop="static",
             id="user-agreement-modal",
-        )
-    ]
+        ),
+    ],
 )
 
 nav_bar = dbc.Navbar(
@@ -77,12 +89,12 @@ nav_bar = dbc.Navbar(
 )
 
 
-def file_dialog_btn(id: str) -> dbc.Button:
+def file_dialog_btn(btn_id: str) -> dbc.Button:
     return dbc.Button(
         [
             html.I(className="bi bi-folder2"),
         ],
-        id=id,
+        id=btn_id,
         style={"backgroundColor": "white", "borderColor": "black", "color": "black"},
     )
 
@@ -93,7 +105,7 @@ output = dbc.Form(
             [
                 dbc.Label("Path", html_for="model-output-path", width=2),
                 dbc.Col(dbc.Input(id="model-output-path", type="text", placeholder="Enter output path"), width=9),
-                dbc.Col(file_dialog_btn(id="output-filedialog-btn")),
+                dbc.Col(file_dialog_btn(btn_id="output-filedialog-btn")),
             ],
             className="mb-3",
         ),
@@ -102,7 +114,9 @@ output = dbc.Form(
                 dbc.Label("Output CSV", html_for="model-output-csv", width=2),
                 dbc.Col(
                     dbc.Input(
-                        id="model-output-csv", type="text", placeholder="Enter name of output CSV file (optional)"
+                        id="model-output-csv",
+                        type="text",
+                        placeholder="Enter name of output CSV file (optional)",
                     ),
                     width=9,
                 ),
@@ -114,7 +128,9 @@ output = dbc.Form(
                 dbc.Label("Output geom", html_for="model-output-geom", width=2),
                 dbc.Col(
                     dbc.Input(
-                        id="model-output-geom", type="text", placeholder="Enter name(s) of output geometry (optional)"
+                        id="model-output-geom",
+                        type="text",
+                        placeholder="Enter name(s) of output geometry (optional)",
                     ),
                     width=9,
                 ),
@@ -140,7 +156,7 @@ hazard = dbc.Form(
             [
                 dbc.Label("File", html_for="model-hazard-file", width=2),
                 dbc.Col(dbc.Input(id="model-hazard-file", type="text", placeholder="Enter hazard file path"), width=9),
-                dbc.Col(file_dialog_btn(id="hazard-file-filedialog-btn")),
+                dbc.Col(file_dialog_btn(btn_id="hazard-file-filedialog-btn")),
             ],
             className="mb-3",
         ),
@@ -155,7 +171,6 @@ hazard = dbc.Form(
                     ),
                     width=9,
                 ),
-                dbc.Col(file_dialog_btn(id="hazard-elev-ref-filedialog-btn")),
             ],
             className="mb-3",
         ),
@@ -179,7 +194,7 @@ exposure = dbc.Form(
                     dbc.Input(id="model-exposure-geom", type="text", placeholder="Enter exposure geom path(s)"),
                     width=9,
                 ),
-                dbc.Col(file_dialog_btn(id="exposure-geom-filedialog-btn")),
+                dbc.Col(file_dialog_btn(btn_id="exposure-geom-filedialog-btn")),
             ],
             className="mb-3",
         ),
@@ -187,9 +202,10 @@ exposure = dbc.Form(
             [
                 dbc.Label("Exposure CSV", html_for="model-exposure-csv", width=2),
                 dbc.Col(
-                    dbc.Input(id="model-exposure-csv", type="text", placeholder="Enter exposure CSV path"), width=9
+                    dbc.Input(id="model-exposure-csv", type="text", placeholder="Enter exposure CSV path"),
+                    width=9,
                 ),
-                dbc.Col(file_dialog_btn(id="exposure-csv-filedialog-btn")),
+                dbc.Col(file_dialog_btn(btn_id="exposure-csv-filedialog-btn")),
             ],
             className="mb-3",
         ),
@@ -204,7 +220,7 @@ vulnerability = dbc.Form(
                     dbc.Input(id="model-vulnerability-file", type="text", placeholder="Enter vulnerability file path"),
                     width=9,
                 ),
-                dbc.Col(file_dialog_btn(id="vulnerability-file-filedialog-btn")),
+                dbc.Col(file_dialog_btn(btn_id="vulnerability-file-filedialog-btn")),
             ],
             className="mb-3",
         ),
@@ -269,10 +285,13 @@ model_run_window = html.Div(
             style={"float": "left", "paddingTop": "1rem"},
             className="mb-3",
         ),
+        dcc.Interval(id="model-log-interval", disabled=True),
+        visdcc.Run_js(id="js-log", run=""),
     ],
     id="model-run-window",
     style={"padding": "1rem", "display": "none"},
 )
+
 
 content_box = dbc.Row(
     [

@@ -2,11 +2,23 @@
 
 from __future__ import annotations
 
+import io
+import logging
+import subprocess
+
 from dash import Input, Output, State, callback, callback_context
 from dash.exceptions import PreventUpdate
 
 from FIAT_GUI.fiat_api import get_available_geom_exts, get_available_grid_exts
-from FIAT_GUI.utils import file_dialog
+from FIAT_GUI.utils import create_fiat_toml, file_dialog
+
+logger = logging.getLogger()
+log_capture_string = io.StringIO()
+ch = logging.StreamHandler(log_capture_string)
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+ch.setFormatter(formatter)
+logger.addHandler(ch)
 
 
 @callback(
@@ -79,19 +91,8 @@ def model_hazard_file_fd(fd_btn):
         "hazard-file-filedialog-btn",
         file_type="grid",
         is_file=True,
-        multiple=True,
-        title="Please select the hazard file(s)",
-    )
-
-
-@callback(Output("model-hazard-elevation-reference", "value"), Input("hazard-elev-ref-filedialog-btn", "n_clicks"))
-def model_hazard_elev_ref_fd(fd_btn):
-    return handle_file_dialog(
-        "hazard-elev-ref-filedialog-btn",
-        file_type="grid",
-        is_file=True,
         multiple=False,
-        title="Select the hazard elevation reference files",
+        title="Please select the hazard file(s)",
     )
 
 
@@ -126,3 +127,67 @@ def model_vulnerability_file_fd(fd_btn):
         multiple=False,
         title="Select the vulnerability CSV file",
     )
+
+
+@callback(
+    Output("model-log-interval", "disabled"),
+    Input("model-run-btn", "n_clicks"),
+    State("model-output-path", "value"),
+    State("model-output-csv", "value"),
+    State("model-output-geom", "value"),
+    State("model-output-grid", "value"),
+    State("model-hazard-file", "value"),
+    State("model-hazard-elevation-reference", "value"),
+    State("model-hazard-risk", "value"),
+    State("model-exposure-geom", "value"),
+    State("model-exposure-csv", "value"),
+    State("model-vulnerability-file", "value"),
+)
+def run_model(
+    run_btn,
+    ouput_path,
+    output_csv,
+    output_geom,
+    output_grid,
+    hazard_file,
+    hazard_elev_ref,
+    hazard_risk,
+    exposure_geom,
+    exposure_csv,
+    vulnerability_file,
+):
+    changed_id = [p["prop_id"] for p in callback_context.triggered][0]
+    if "model-run-btn" in changed_id:
+        toml_file = create_fiat_toml(
+            ouput_path=ouput_path,
+            output_csv=output_csv,
+            output_geom=output_geom,
+            output_grid=output_grid,
+            hazard_file=hazard_file,
+            hazard_elev_ref=hazard_elev_ref,
+            hazard_risk=hazard_risk,
+            exposure_geom=exposure_geom,
+            exposure_csv=exposure_csv,
+            vulnerability_file=vulnerability_file,
+        )
+        subprocess.run(["fiat", "run", toml_file, "-v"])
+        return False
+    raise PreventUpdate
+
+
+@callback(
+    Output("model-log", "value"),
+    Output("js-log", "run"),
+    Input("model-log-interval", "n_intervals"),
+    State("model-log-interval", "disabled"),
+    State("model-log", "value"),
+)
+def stream_model_log(n_intervals, model_log_disabled, model_log):
+    if n_intervals and not model_log_disabled:
+        js = """
+        var textarea = document.getElementById('model-log');
+        textarea.scrollTop = textarea.scrollHeight;
+        """
+
+        return log_capture_string.getvalue(), js
+    raise PreventUpdate
