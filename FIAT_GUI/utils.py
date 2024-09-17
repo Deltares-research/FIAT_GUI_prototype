@@ -36,6 +36,7 @@ def create_fiat_toml(
     hazard_elev_ref: str,
     hazard_risk: bool,
     exposure_geom: str,
+    exposure_geom_crs: str,
     exposure_csv: str,
     vulnerability_file: str,
 ) -> Path:
@@ -47,7 +48,7 @@ def create_fiat_toml(
     model_config["output"] = {"path": ouput_path, "csv": {"name": output_csv}, "geom": output_geom, "grid": output_grid}
     model_config["hazard"] = {"file": hazard_file, "elevation_reference": hazard_elev_ref, "risk": hazard_risk}
     if exposure_geom:
-        exposure_geom = _seperate_input_names(exposure_geom, key="file")
+        exposure_geom = _seperate_input_names(exposure_geom, key="file", crs=exposure_geom_crs)
     model_config["exposure"] = {"geom": exposure_geom, "csv": {"file": exposure_csv}}
     model_config["vulnerability"] = {"file": vulnerability_file}
 
@@ -58,7 +59,11 @@ def create_fiat_toml(
     return toml_file
 
 
-def _seperate_input_names(_input: list, key: str = "name") -> dict:
+def _seperate_input_names(_input: list, key: str = "name", crs=None) -> dict:
     if not isinstance(_input, list):
         _input = [_input]
-    return {f"{key}{x+1}": name for x, name in enumerate(_input)}
+
+    _dict = {f"{key}{x+1}": name for x, name in enumerate(_input)}
+    if crs:
+        _dict["crs"] = crs
+    return _dict

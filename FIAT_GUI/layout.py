@@ -200,6 +200,15 @@ exposure = dbc.Form(
         ),
         dbc.Row(
             [
+                dbc.Label("Exposure geom CRS", width=2),
+                dbc.Col(
+                    dbc.Input(id="model-exposure-geom-crs", placeholder="Add geom CRS in EPSG", type="text"), width=9
+                ),
+            ],
+            className="mb-3",
+        ),
+        dbc.Row(
+            [
                 dbc.Label("Exposure CSV", html_for="model-exposure-csv", width=2),
                 dbc.Col(
                     dbc.Input(id="model-exposure-csv", type="text", placeholder="Enter exposure CSV path"),

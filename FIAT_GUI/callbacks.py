@@ -3,23 +3,16 @@
 from __future__ import annotations
 
 import io
-import logging
 from pathlib import Path
 
-import subprocess
 from dash import Input, Output, State, callback, callback_context
 from dash.exceptions import PreventUpdate
 
-from FIAT_GUI.fiat_api import get_available_geom_exts, get_available_grid_exts
+from FIAT_GUI.fiat_api import get_available_geom_exts, get_available_grid_exts, run_model
 from FIAT_GUI.utils import create_fiat_toml, file_dialog
 
-logger = logging.getLogger()
-log_capture_string = io.StringIO()
-ch = logging.StreamHandler(log_capture_string)
-ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-ch.setFormatter(formatter)
-logger.addHandler(ch)
+
+LOG_STRING = io.StringIO()
 
 
 @callback(
@@ -133,6 +126,7 @@ def model_vulnerability_file_fd(fd_btn):
 @callback(
     Output("model-log-interval", "disabled"),
     Input("next-btn", "n_clicks"),
+    Input("model-back-btn", "n_clicks"),
     State("model-output-path", "value"),
     State("model-output-csv", "value"),
     State("model-output-geom", "value"),
@@ -141,11 +135,13 @@ def model_vulnerability_file_fd(fd_btn):
     State("model-hazard-elevation-reference", "value"),
     State("model-hazard-risk", "value"),
     State("model-exposure-geom", "value"),
+    State("model-exposure-geom-crs", "value"),
     State("model-exposure-csv", "value"),
     State("model-vulnerability-file", "value"),
 )
 def create_toml(
     next_btn,
+    back_btn,
     ouput_path,
     output_csv,
     output_geom,
@@ -154,6 +150,7 @@ def create_toml(
     hazard_elev_ref,
     hazard_risk,
     exposure_geom,
+    exposure_geom_crs,
     exposure_csv,
     vulnerability_file,
 ):
@@ -168,10 +165,13 @@ def create_toml(
             hazard_elev_ref=hazard_elev_ref,
             hazard_risk=hazard_risk,
             exposure_geom=exposure_geom,
+            exposure_geom_crs=exposure_geom_crs,
             exposure_csv=exposure_csv,
             vulnerability_file=vulnerability_file,
         )
         return False
+    if "model-back-btn" in changed_id:
+        return True
     raise PreventUpdate
 
 
@@ -182,15 +182,17 @@ def create_toml(
     Input("model-run-btn", "n_clicks"),
     State("model-log-interval", "disabled"),
     State("model-log", "value"),
+    State("model-output-path", "value"),
 )
-def stream_model_log(n_intervals, run_btn, model_log_disabled, model_log):
+def stream_model_log(n_intervals, run_btn, model_log_disabled, model_log, output_path):
     if n_intervals and not model_log_disabled:
         js = """
         var textarea = document.getElementById('model-log');
         textarea.scrollTop = textarea.scrollHeight;
         """
-
-        return log_capture_string.getvalue(), js
+        if value := LOG_STRING.getvalue():
+            model_log = value
+        return model_log, js
 
     raise PreventUpdate
 
@@ -200,10 +202,11 @@ def stream_model_log(n_intervals, run_btn, model_log_disabled, model_log):
     Input("model-run-btn", "n_clicks"),
     State("model-output-path", "value"),
 )
-def run_model(n_clicks, output_path):
+def start_model(n_clicks, output_path):
     changed_id = [p["prop_id"] for p in callback_context.triggered][0]
     if "model-run-btn" in changed_id:
-        model_config_path = output_path + "/model_config.toml"
-        subprocess.run(["fiat", "run", model_config_path, "-v"], shell=True)
+        model_config_path = Path(output_path) / "model_config.toml"
+        # run model
+        run_model(model_config_path, log_stream=LOG_STRING, log_file=output_path)
         return True
     raise PreventUpdate
