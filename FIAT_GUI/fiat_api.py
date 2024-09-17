@@ -40,7 +40,8 @@ def get_available_grid_exts() -> list:
 def run_model(cfg, log_file, log_stream):
     logger = setup_default_log("fiat", level=2, dst=log_file)
     logger._handlers.append(CHandler(level=2, stream=log_stream, name="fiat"))
-    log_stream.write(fiat_start_str)
+    for line in fiat_start_str.split("\n"):
+        log_stream.write(line + "\n")
 
     m = FIAT.from_path(file=cfg)
     m.run()

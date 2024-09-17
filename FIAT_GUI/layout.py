@@ -164,10 +164,9 @@ hazard = dbc.Form(
             [
                 dbc.Label("Elevation reference", html_for="model-hazard-elevation-reference", width=2),
                 dbc.Col(
-                    dbc.Input(
+                    dbc.Select(
+                        options=[{"label": "DEM", "value": "DEM"}, {"label": "datum", "value": "datum"}],
                         id="model-hazard-elevation-reference",
-                        type="text",
-                        placeholder="Enter hazard elevation reference path",
                     ),
                     width=9,
                 ),
@@ -283,10 +282,12 @@ model_run_window = html.Div(
         dbc.Textarea(
             id="model-log",
             readOnly=True,
+            size="lg",
             style={
                 "height": "60vh",
                 "margin": "auto",
                 "padding": "1rem",
+                "fontFamily": "Courier New, monospace",
             },
         ),
         dbc.Row(
