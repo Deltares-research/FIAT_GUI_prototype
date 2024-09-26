@@ -67,3 +67,21 @@ def _seperate_input_names(_input: list, key: str = "name", crs=None) -> dict:
     if crs:
         _dict["crs"] = crs
     return _dict
+
+
+def _validate_path_callback(path: str | None, formtext_style: dict) -> tuple[bool, bool, dict]:
+    formtext_style.update({"display": "none"})
+    if path:
+        if "," in path:
+            if all(Path(p).exists() for p in path.split(",")):
+                return True, False, formtext_style
+        elif Path(path).exists():
+            return True, False, formtext_style
+        formtext_style.update({"display": "block"})
+        return (
+            False,
+            True,
+            formtext_style,
+        )
+
+    return False, False, formtext_style

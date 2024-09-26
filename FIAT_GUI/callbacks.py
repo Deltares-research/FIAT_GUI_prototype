@@ -9,7 +9,7 @@ from dash import Input, Output, State, callback, callback_context
 from dash.exceptions import PreventUpdate
 
 from FIAT_GUI.fiat_api import get_available_geom_exts, get_available_grid_exts, run_model
-from FIAT_GUI.utils import create_fiat_toml, file_dialog
+from FIAT_GUI.utils import _validate_path_callback, create_fiat_toml, file_dialog
 
 LOG_STRING = io.StringIO()
 
@@ -123,6 +123,61 @@ def model_vulnerability_file_fd(fd_btn):
 
 
 @callback(
+    Output("model-output-path", "valid"),
+    Output("model-output-path", "invalid"),
+    Output("model-output-path-formtext", "style"),
+    Input("model-output-path", "value"),
+    State("model-output-path-formtext", "style"),
+)
+def validate_model_output_path(path, formtext_style):
+    return _validate_path_callback(path, formtext_style)
+
+
+@callback(
+    Output("model-hazard-file", "valid"),
+    Output("model-hazard-file", "invalid"),
+    Output("model-hazard-file-formtext", "style"),
+    Input("model-hazard-file", "value"),
+    State("model-hazard-file-formtext", "style"),
+)
+def validate_hazard_file_path(path, formtext_style):
+    return _validate_path_callback(path, formtext_style)
+
+
+@callback(
+    Output("model-exposure-geom", "valid"),
+    Output("model-exposure-geom", "invalid"),
+    Output("model-exposure-geom-formtext", "style"),
+    Input("model-exposure-geom", "value"),
+    State("model-exposure-geom-formtext", "style"),
+)
+def validate_exposure_geom_path(path, formtext_style):
+    return _validate_path_callback(path, formtext_style)
+
+
+@callback(
+    Output("model-exposure-csv", "valid"),
+    Output("model-exposure-csv", "invalid"),
+    Output("model-exposure-csv-formtext", "style"),
+    Input("model-exposure-csv", "value"),
+    State("model-exposure-csv-formtext", "style"),
+)
+def validate_exposure_csv_path(path, formtext_style):
+    return _validate_path_callback(path, formtext_style)
+
+
+@callback(
+    Output("model-vulnerability-file", "valid"),
+    Output("model-vulnerability-file", "invalid"),
+    Output("model-vulnerability-file-formtext", "style"),
+    Input("model-vulnerability-file", "value"),
+    State("model-vulnerability-file-formtext", "style"),
+)
+def validate_vulnerability_file(path, formtext_style):
+    return _validate_path_callback(path, formtext_style)
+
+
+@callback(
     Output("next-btn", "disabled"),
     Input("model-output-path", "value"),
     Input("model-hazard-file", "value"),
@@ -152,7 +207,7 @@ def enable_next_btn(*args: tuple[str]):
     State("model-exposure-csv", "value"),
     State("model-vulnerability-file", "value"),
 )
-def create_toml(
+def create_toml(  # noqa: PLR0913
     next_btn,
     back_btn,
     ouput_path,

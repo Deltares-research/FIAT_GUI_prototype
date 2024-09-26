@@ -104,7 +104,17 @@ output = dbc.Form(
         dbc.Row(
             [
                 dbc.Label("Path", html_for="model-output-path", width=2),
-                dbc.Col(dbc.Input(id="model-output-path", type="text", placeholder="Enter output path"), width=9),
+                dbc.Col(
+                    [
+                        dbc.Input(id="model-output-path", type="text", placeholder="Enter output path"),
+                        dbc.FormText(
+                            "Add a valid path to the output directory",
+                            style={"display": "none", "color": "red"},
+                            id="model-output-path-formtext",
+                        ),
+                    ],
+                    width=9,
+                ),
                 dbc.Col(file_dialog_btn(btn_id="output-filedialog-btn")),
             ],
             className="mb-3",
@@ -155,7 +165,17 @@ hazard = dbc.Form(
         dbc.Row(
             [
                 dbc.Label("File", html_for="model-hazard-file", width=2),
-                dbc.Col(dbc.Input(id="model-hazard-file", type="text", placeholder="Enter hazard file path"), width=9),
+                dbc.Col(
+                    [
+                        dbc.Input(id="model-hazard-file", type="text", placeholder="Enter hazard file path"),
+                        dbc.FormText(
+                            "Add a valid path to the hazard file",
+                            style={"display": "none", "color": "red"},
+                            id="model-hazard-file-formtext",
+                        ),
+                    ],
+                    width=9,
+                ),
                 dbc.Col(file_dialog_btn(btn_id="hazard-file-filedialog-btn")),
             ],
             className="mb-3",
@@ -190,7 +210,14 @@ exposure = dbc.Form(
             [
                 dbc.Label("Exposure geom", html_for="model-exposure-geom", width=2),
                 dbc.Col(
-                    dbc.Input(id="model-exposure-geom", type="text", placeholder="Enter exposure geom path(s)"),
+                    [
+                        dbc.Input(id="model-exposure-geom", type="text", placeholder="Enter exposure geom path(s)"),
+                        dbc.FormText(
+                            "Add a valid path to the exposure geometry file",
+                            style={"display": "none", "color": "red"},
+                            id="model-exposure-geom-formtext",
+                        ),
+                    ],
                     width=9,
                 ),
                 dbc.Col(file_dialog_btn(btn_id="exposure-geom-filedialog-btn")),
@@ -210,7 +237,14 @@ exposure = dbc.Form(
             [
                 dbc.Label("Exposure CSV", html_for="model-exposure-csv", width=2),
                 dbc.Col(
-                    dbc.Input(id="model-exposure-csv", type="text", placeholder="Enter exposure CSV path"),
+                    [
+                        dbc.Input(id="model-exposure-csv", type="text", placeholder="Enter exposure CSV path"),
+                        dbc.FormText(
+                            "Add a valid path to the model exposure csv file",
+                            style={"display": "none", "color": "red"},
+                            id="model-exposure-csv-formtext",
+                        ),
+                    ],
                     width=9,
                 ),
                 dbc.Col(file_dialog_btn(btn_id="exposure-csv-filedialog-btn")),
@@ -225,7 +259,16 @@ vulnerability = dbc.Form(
             [
                 dbc.Label("Vulnerability file", html_for="model-vulnerability-file", width=2),
                 dbc.Col(
-                    dbc.Input(id="model-vulnerability-file", type="text", placeholder="Enter vulnerability file path"),
+                    [
+                        dbc.Input(
+                            id="model-vulnerability-file", type="text", placeholder="Enter vulnerability file path"
+                        ),
+                        dbc.FormText(
+                            "Add a valid path to vulnerability file",
+                            style={"display": "none", "color": "red"},
+                            id="model-vulnerability-file-formtext",
+                        ),
+                    ],
                     width=9,
                 ),
                 dbc.Col(file_dialog_btn(btn_id="vulnerability-file-filedialog-btn")),
