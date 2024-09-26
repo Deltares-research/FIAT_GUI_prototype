@@ -7,3 +7,4 @@ dependencies:
       - dash-bootstrap-components
       - git+https://github.com/Deltares/Delft-FIAT.git
       - toml
+      - waitress
