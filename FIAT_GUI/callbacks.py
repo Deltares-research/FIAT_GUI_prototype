@@ -11,7 +11,6 @@ from dash.exceptions import PreventUpdate
 from FIAT_GUI.fiat_api import get_available_geom_exts, get_available_grid_exts, run_model
 from FIAT_GUI.utils import create_fiat_toml, file_dialog
 
-
 LOG_STRING = io.StringIO()
 
 
@@ -121,6 +120,20 @@ def model_vulnerability_file_fd(fd_btn):
         multiple=False,
         title="Select the vulnerability CSV file",
     )
+
+
+@callback(
+    Output("next-btn", "disabled"),
+    Input("model-output-path", "value"),
+    Input("model-hazard-file", "value"),
+    Input("model-hazard-elevation-reference", "value"),
+    Input("model-exposure-geom", "value"),
+    Input("model-exposure-geom-crs", "value"),
+    Input("model-exposure-csv", "value"),
+    Input("model-vulnerability-file", "value"),
+)
+def enable_next_btn(*args: tuple[str]):
+    return not all(args)
 
 
 @callback(
