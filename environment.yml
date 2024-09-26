@@ -1,0 +1,9 @@
+name: FIAT-GUI
+dependencies:
+  - python >=3.10
+  - pip
+  - dash
+  - pip:
+      - dash-bootstrap-components
+      - git+https://github.com/Deltares/Delft-FIAT.git
+      - toml
