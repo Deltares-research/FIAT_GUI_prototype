@@ -45,6 +45,23 @@ def toggle_content(next_btn, back_btn, config_form_style: dict, run_window_style
     return config_form_style, run_window_style
 
 
+@callback(
+    Output("hazard-multiple-input", "style"),
+    Output("hazard-single-input", "style"),
+    Input("model-hazard-risk", "value"),
+    State("hazard-multiple-input", "style"),
+    State("hazard-single-input", "style"),
+)
+def toggle_multiple_hazard_input(switch_on, multi_hazard_style, single_hazard_style):
+    single_hazard_style.update({"display": "block"})
+    multi_hazard_style.update({"display": "none"})
+    if switch_on:
+        single_hazard_style.update({"display": "none"})
+        multi_hazard_style.update({"display": "block"})
+        return multi_hazard_style, single_hazard_style
+    return multi_hazard_style, single_hazard_style
+
+
 def handle_file_dialog(
     btn_id: str,
     *,

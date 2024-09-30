@@ -164,41 +164,64 @@ hazard = dbc.Form(
     [
         dbc.Row(
             [
-                dbc.Label("File", html_for="model-hazard-file", width=2),
-                dbc.Col(
-                    [
-                        dbc.Input(id="model-hazard-file", type="text", placeholder="Enter hazard file path"),
-                        dbc.FormText(
-                            "Add a valid path to the hazard file",
-                            style={"display": "none", "color": "red"},
-                            id="model-hazard-file-formtext",
-                        ),
-                    ],
-                    width=9,
-                ),
-                dbc.Col(file_dialog_btn(btn_id="hazard-file-filedialog-btn")),
-            ],
-            className="mb-3",
-        ),
-        dbc.Row(
-            [
-                dbc.Label("Elevation reference", html_for="model-hazard-elevation-reference", width=2),
-                dbc.Col(
-                    dbc.Select(
-                        options=[{"label": "DEM", "value": "DEM"}, {"label": "datum", "value": "datum"}],
-                        id="model-hazard-elevation-reference",
-                    ),
-                    width=9,
-                ),
-            ],
-            className="mb-3",
-        ),
-        dbc.Row(
-            [
                 dbc.Label("Risk", html_for="model-hazard-risk", width=2),
                 dbc.Col(dbc.Switch(id="model-hazard-risk", value=False)),
             ],
             className="mb-3",
+        ),
+        html.Div(
+            [
+                dbc.Row(
+                    [
+                        dbc.Label("Hazard file 1", width=2),
+                        dbc.Col(dbc.Input(type="text", placeholder="Enter hazard file path"), width=6),
+                        dbc.Col(file_dialog_btn("btn-id"), width=1),
+                        dbc.Label("Return period", width=2),
+                        dbc.Col(dbc.Input(type="number")),
+                    ],
+                    className="mb-3",
+                ),
+                dbc.Row(dbc.Col(dbc.Button("add another hazard"), width=3), justify="center", className="mb-3"),
+            ],
+            id="hazard-multiple-input",
+            style={"display": "none"},
+        ),
+        html.Div(
+            [
+                dbc.Row(
+                    [
+                        dbc.Label("File", html_for="model-hazard-file", width=2),
+                        dbc.Col(
+                            [
+                                dbc.Input(id="model-hazard-file", type="text", placeholder="Enter hazard file path"),
+                                dbc.FormText(
+                                    "Add a valid path to the hazard file",
+                                    style={"display": "none", "color": "red"},
+                                    id="model-hazard-file-formtext",
+                                ),
+                            ],
+                            width=9,
+                        ),
+                        dbc.Col(file_dialog_btn(btn_id="hazard-file-filedialog-btn")),
+                    ],
+                    className="mb-3",
+                ),
+                dbc.Row(
+                    [
+                        dbc.Label("Elevation reference", html_for="model-hazard-elevation-reference", width=2),
+                        dbc.Col(
+                            dbc.Select(
+                                options=[{"label": "DEM", "value": "DEM"}, {"label": "datum", "value": "datum"}],
+                                id="model-hazard-elevation-reference",
+                            ),
+                            width=9,
+                        ),
+                    ],
+                    className="mb-3",
+                ),
+            ],
+            id="hazard-single-input",
+            style={"display": "block"},
         ),
     ],
 )
