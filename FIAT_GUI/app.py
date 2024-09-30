@@ -14,7 +14,7 @@ app = Dash(
         dbc.icons.BOOTSTRAP,
     ],
 )
-
+server = app.server
 app.layout = layout
 
 if __name__ == "__main__":

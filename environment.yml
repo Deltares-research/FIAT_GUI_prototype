@@ -1,6 +1,7 @@
 name: FIAT-GUI
 dependencies:
   - python >=3.10
+  - gdal
   - pip
   - dash
   - pip:
@@ -8,3 +9,4 @@ dependencies:
       - git+https://github.com/Deltares/Delft-FIAT.git
       - toml
       - waitress
+      - visdcc

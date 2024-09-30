@@ -5,7 +5,7 @@ from threading import Timer
 
 from waitress import serve
 
-from FIAT_GUI import app
+from FIAT_GUI.app import server
 
 
 def open_browser() -> None:
@@ -15,4 +15,4 @@ def open_browser() -> None:
 
 if __name__ == "__main__":
     Timer(1, open_browser).start()
-    serve(app.server)
+    serve(server)
