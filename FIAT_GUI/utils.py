@@ -69,11 +69,11 @@ def _seperate_input_names(_input: list, key: str = "name", crs=None) -> dict:
     return _dict
 
 
-def _validate_path_callback(path: str | None, formtext_style: dict) -> tuple[bool, bool, dict]:
+def _validate_path_callback(path: str | None | list, formtext_style: dict) -> tuple[bool, bool, dict]:
     formtext_style.update({"display": "none"})
     if path:
-        if "," in path:
-            if all(Path(p).exists() for p in path.split(",")):
+        if isinstance(path, list):
+            if all(Path(p).exists() for p in path):
                 return True, False, formtext_style
         elif Path(path).exists():
             return True, False, formtext_style
