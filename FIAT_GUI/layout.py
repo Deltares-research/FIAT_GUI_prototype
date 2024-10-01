@@ -174,14 +174,35 @@ hazard = dbc.Form(
                 dbc.Row(
                     [
                         dbc.Label("Hazard file 1", width=2),
-                        dbc.Col(dbc.Input(type="text", placeholder="Enter hazard file path"), width=6),
-                        dbc.Col(file_dialog_btn("btn-id"), width=1),
+                        dbc.Col(
+                            [
+                                dbc.Input(
+                                    type="text",
+                                    placeholder="Enter hazard file path",
+                                    id={"type": "multiple-hazard-file-input", "index": 1},
+                                ),
+                                dbc.FormText(
+                                    "Add a valid path to the hazard file",
+                                    style={"display": "none", "color": "red"},
+                                    id={"type": "multiple-hazard-file-input-formtext", "index": 1},
+                                ),
+                            ],
+                            width=6,
+                        ),
+                        dbc.Col(file_dialog_btn({"type": "multiple-hazard-file-input-dialog", "index": 1}), width=1),
                         dbc.Label("Return period", width=2),
                         dbc.Col(dbc.Input(type="number")),
                     ],
                     className="mb-3",
                 ),
-                dbc.Row(dbc.Col(dbc.Button("add another hazard"), width=3), justify="center", className="mb-3"),
+                dbc.Row(
+                    dbc.Col(
+                        dbc.Button("add another hazard", id="add-hazard-btn", style={"backgroundColor": FONT_COLOR}),
+                        width=3,
+                    ),
+                    justify="center",
+                    className="mb-3",
+                ),
             ],
             id="hazard-multiple-input",
             style={"display": "none"},
@@ -251,7 +272,8 @@ exposure = dbc.Form(
             [
                 dbc.Label("Exposure geom CRS", width=2),
                 dbc.Col(
-                    dbc.Input(id="model-exposure-geom-crs", placeholder="Add geom CRS in EPSG", type="text"), width=9
+                    dbc.Input(id="model-exposure-geom-crs", placeholder="Add geom CRS in EPSG", type="text"),
+                    width=9,
                 ),
             ],
             className="mb-3",
@@ -284,7 +306,9 @@ vulnerability = dbc.Form(
                 dbc.Col(
                     [
                         dbc.Input(
-                            id="model-vulnerability-file", type="text", placeholder="Enter vulnerability file path"
+                            id="model-vulnerability-file",
+                            type="text",
+                            placeholder="Enter vulnerability file path",
                         ),
                         dbc.FormText(
                             "Add a valid path to vulnerability file",
@@ -364,7 +388,9 @@ model_run_window = html.Div(
                 ),
                 dbc.Col(
                     dbc.Button(
-                        "Run model", id="model-run-btn", style={"backgroundColor": FONT_COLOR, "float": "right"}
+                        "Run model",
+                        id="model-run-btn",
+                        style={"backgroundColor": FONT_COLOR, "float": "right"},
                     ),
                     width=3,
                 ),

@@ -34,11 +34,11 @@ def create_fiat_toml(
     output_grid: str,
     hazard_file: str,
     hazard_elev_ref: str,
-    hazard_risk: bool,
     exposure_geom: str,
     exposure_geom_crs: str,
     exposure_csv: str,
     vulnerability_file: str,
+    config_file_name: str = "model_config.toml",
 ) -> Path:
     model_config = {}
     if output_geom:
@@ -46,13 +46,16 @@ def create_fiat_toml(
     if output_grid:
         output_grid = _seperate_input_names(output_grid)
     model_config["output"] = {"path": ouput_path, "csv": {"name": output_csv}, "geom": output_geom, "grid": output_grid}
-    model_config["hazard"] = {"file": hazard_file, "elevation_reference": hazard_elev_ref, "risk": hazard_risk}
+    model_config["hazard"] = {"file": hazard_file, "elevation_reference": hazard_elev_ref}
     if exposure_geom:
         exposure_geom = _seperate_input_names(exposure_geom, key="file", crs=exposure_geom_crs)
     model_config["exposure"] = {"geom": exposure_geom, "csv": {"file": exposure_csv}}
     model_config["vulnerability"] = {"file": vulnerability_file}
 
-    toml_file = Path(ouput_path) / "model_config.toml"
+    output_path = Path(ouput_path) / "config"
+    if not output_path.exists():
+        output_path.mkdir(exist_ok=True)
+    toml_file = ouput_path / config_file_name
 
     with toml_file.open(mode="w") as f:
         toml.dump(model_config, f)
