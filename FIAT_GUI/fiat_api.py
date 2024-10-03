@@ -37,6 +37,8 @@ def get_available_geom_exts() -> list:
 def get_available_grid_exts() -> list:
     """Generate a list of supported grid extentions."""
     grid_drivers = _create_grid_driver_map()
+    if ".nc" not in grid_drivers:
+        grid_drivers.update({".nc": "NetCDF"})
     return [("Grid files", " ".join(["*" + key for key in grid_drivers]))]
 
 
