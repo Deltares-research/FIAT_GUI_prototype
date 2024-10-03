@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 import io
-from pathlib import Path
+import re
 
 import dash_bootstrap_components as dbc
-from dash import MATCH, Input, Output, State, callback, callback_context, ALL
+from dash import ALL, MATCH, Input, Output, State, callback, callback_context
 from dash.exceptions import PreventUpdate
 
 from FIAT_GUI.fiat_api import get_available_geom_exts, get_available_grid_exts, run_model
@@ -111,7 +111,8 @@ def add_hazard_input(n_clicks, multiple_hazard_children):
     Input({"type": "multiple-hazard-file-input-dialog", "index": MATCH}, "n_clicks"),
 )
 def handle_file_dialog_multiple_hazard(n_clicks):
-    if n_clicks:
+    changed_id = [p["prop_id"] for p in callback_context.triggered][0]
+    if "multiple-hazard-file-input-dialog" in changed_id:
         return file_dialog(title="Please select the hazard file", file_types=get_available_grid_exts(), is_file=True)
     raise PreventUpdate
 
@@ -261,22 +262,28 @@ def validate_vulnerability_file(path, formtext_style):
 
 @callback(
     Output("next-btn", "disabled"),
-    Input("model-output-path", "value"),
-    # Input("model-hazard-file", "value"),
+    Input("model-hazard-risk", "value"),
+    Input({"type": "multiple-hazard-file-input", "index": ALL}, "value"),
+    Input({"type": "hazard-return-period", "index": ALL}, "value"),
+    Input("model-hazard-file", "value"),
     Input("model-hazard-elevation-reference", "value"),
+    Input("model-output-path", "value"),
     Input("model-exposure-geom", "value"),
     Input("model-exposure-geom-crs", "value"),
     Input("model-exposure-csv", "value"),
     Input("model-vulnerability-file", "value"),
 )
-def enable_next_btn(*args: tuple[str]):
-    return not all(args)
+def enable_next_btn(hazard_risk, multiple_hazard_input, hazard_rps, hazard_file, *args: tuple[str]):
+    if hazard_risk:
+        return not (all(multiple_hazard_input) and all(hazard_rps) and all(args))
+    return not (hazard_file and all(args))
 
 
 @callback(
     Output("model-log-interval", "disabled"),
     Input("next-btn", "n_clicks"),
     Input("model-back-btn", "n_clicks"),
+    Input("model-run-alert", "is_open"),
     State("model-output-path", "value"),
     State("model-output-csv", "value"),
     State("model-output-geom", "value"),
@@ -294,6 +301,7 @@ def enable_next_btn(*args: tuple[str]):
 def create_toml(  # noqa: PLR0913
     next_btn,
     back_btn,
+    model_run_finished,
     ouput_path,
     output_csv,
     output_geom,
@@ -314,7 +322,7 @@ def create_toml(  # noqa: PLR0913
             for hazard_fp, rp in zip(multiple_hazard_files, return_periods):
                 config_file = f"return_period_{rp}.toml"
                 create_fiat_toml(
-                    ouput_path=ouput_path,
+                    output_path=ouput_path,
                     output_csv=output_csv,
                     output_geom=output_geom,
                     output_grid=output_grid,
@@ -325,23 +333,28 @@ def create_toml(  # noqa: PLR0913
                     exposure_csv=exposure_csv,
                     vulnerability_file=vulnerability_file,
                     config_file_name=config_file,
+                    rp=rp,
                 )
-
-        create_fiat_toml(
-            ouput_path=ouput_path,
-            output_csv=output_csv,
-            output_geom=output_geom,
-            output_grid=output_grid,
-            hazard_file=hazard_file,
-            hazard_elev_ref=hazard_elev_ref,
-            exposure_geom=exposure_geom,
-            exposure_geom_crs=exposure_geom_crs,
-            exposure_csv=exposure_csv,
-            vulnerability_file=vulnerability_file,
-        )
+        else:
+            create_fiat_toml(
+                output_path=ouput_path,
+                output_csv=output_csv,
+                output_geom=output_geom,
+                output_grid=output_grid,
+                hazard_file=hazard_file,
+                hazard_elev_ref=hazard_elev_ref,
+                exposure_geom=exposure_geom,
+                exposure_geom_crs=exposure_geom_crs,
+                exposure_csv=exposure_csv,
+                vulnerability_file=vulnerability_file,
+            )
         return False
     if "model-back-btn" in changed_id:
         return True
+
+    if model_run_finished:
+        return True
+
     raise PreventUpdate
 
 
@@ -375,8 +388,7 @@ def stream_model_log(n_intervals, run_btn, model_log_disabled, model_log, output
 def start_model(n_clicks, output_path):
     changed_id = [p["prop_id"] for p in callback_context.triggered][0]
     if "model-run-btn" in changed_id:
-        model_config_path = Path(output_path) / "model_config.toml"
         # run model
-        run_model(model_config_path, log_stream=LOG_STRING, log_file=output_path)
+        run_model(output_path, log_stream=LOG_STRING, log_file=output_path)
         return True
     raise PreventUpdate

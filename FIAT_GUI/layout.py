@@ -169,6 +169,19 @@ hazard = dbc.Form(
             ],
             className="mb-3",
         ),
+        dbc.Row(
+            [
+                dbc.Label("Elevation reference", html_for="model-hazard-elevation-reference", width=2),
+                dbc.Col(
+                    dbc.Select(
+                        options=[{"label": "DEM", "value": "DEM"}, {"label": "datum", "value": "datum"}],
+                        id="model-hazard-elevation-reference",
+                    ),
+                    width=9,
+                ),
+            ],
+            className="mb-3",
+        ),
         html.Div(
             [
                 dbc.Row(
@@ -191,7 +204,7 @@ hazard = dbc.Form(
                         ),
                         dbc.Col(file_dialog_btn({"type": "multiple-hazard-file-input-dialog", "index": 1}), width=1),
                         dbc.Label("Return period", width=2),
-                        dbc.Col(dbc.Input(type="number")),
+                        dbc.Col(dbc.Input(id={"type": "hazard-return-period", "index": 1}, type="number")),
                     ],
                     className="mb-3",
                 ),
@@ -224,19 +237,6 @@ hazard = dbc.Form(
                             width=9,
                         ),
                         dbc.Col(file_dialog_btn(btn_id="hazard-file-filedialog-btn")),
-                    ],
-                    className="mb-3",
-                ),
-                dbc.Row(
-                    [
-                        dbc.Label("Elevation reference", html_for="model-hazard-elevation-reference", width=2),
-                        dbc.Col(
-                            dbc.Select(
-                                options=[{"label": "DEM", "value": "DEM"}, {"label": "datum", "value": "datum"}],
-                                id="model-hazard-elevation-reference",
-                            ),
-                            width=9,
-                        ),
                     ],
                     className="mb-3",
                 ),
@@ -399,7 +399,7 @@ model_run_window = html.Div(
             className="mb-3",
             justify="around",
         ),
-        dbc.Alert("model run started", id="model-run-alert", duration=5000),
+        dbc.Alert("model run finished", id="model-run-alert", duration=5000),
         dcc.Interval(id="model-log-interval", disabled=True),
         visdcc.Run_js(id="js-log", run=""),
     ],

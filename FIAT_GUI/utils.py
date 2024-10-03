@@ -28,7 +28,7 @@ def file_dialog(title: str, file_types, *, is_file: bool = True, multiple: bool 
 
 def create_fiat_toml(
     *,
-    ouput_path: str,
+    output_path: str,
     output_csv: str,
     output_geom: str,
     output_grid: str,
@@ -39,23 +39,35 @@ def create_fiat_toml(
     exposure_csv: str,
     vulnerability_file: str,
     config_file_name: str = "model_config.toml",
+    rp: int | None = None,
 ) -> Path:
     model_config = {}
     if output_geom:
         output_geom = _seperate_input_names(output_geom)
     if output_grid:
         output_grid = _seperate_input_names(output_grid)
-    model_config["output"] = {"path": ouput_path, "csv": {"name": output_csv}, "geom": output_geom, "grid": output_grid}
-    model_config["hazard"] = {"file": hazard_file, "elevation_reference": hazard_elev_ref}
+
+    if rp:
+        model_output_path = Path(output_path) / f"return_period_{rp}"
+        model_output_path.mkdir(exist_ok=True)
+    else:
+        model_output_path = output_path
+    model_config["output"] = {
+        "path": model_output_path.as_posix(),
+        "csv": {"name": output_csv},
+        "geom": output_geom,
+        "grid": output_grid,
+    }
+    model_config["hazard"] = {"file": hazard_file, "elevation_reference": hazard_elev_ref, "risk": False}
     if exposure_geom:
         exposure_geom = _seperate_input_names(exposure_geom, key="file", crs=exposure_geom_crs)
     model_config["exposure"] = {"geom": exposure_geom, "csv": {"file": exposure_csv}}
     model_config["vulnerability"] = {"file": vulnerability_file}
 
-    output_path = Path(ouput_path) / "config"
+    output_path = Path(output_path) / "config"
     if not output_path.exists():
         output_path.mkdir(exist_ok=True)
-    toml_file = ouput_path / config_file_name
+    toml_file = output_path / config_file_name
 
     with toml_file.open(mode="w") as f:
         toml.dump(model_config, f)
