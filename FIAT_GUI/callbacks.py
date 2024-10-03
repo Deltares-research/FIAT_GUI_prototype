@@ -3,12 +3,14 @@
 from __future__ import annotations
 
 import io
-from pathlib import Path
+import re
 
-from dash import Input, Output, State, callback, callback_context
+import dash_bootstrap_components as dbc
+from dash import ALL, MATCH, Input, Output, State, callback, callback_context
 from dash.exceptions import PreventUpdate
 
 from FIAT_GUI.fiat_api import get_available_geom_exts, get_available_grid_exts, run_model
+from FIAT_GUI.layout import file_dialog_btn
 from FIAT_GUI.utils import _validate_path_callback, create_fiat_toml, file_dialog
 
 LOG_STRING = io.StringIO()
@@ -43,6 +45,87 @@ def toggle_content(next_btn, back_btn, config_form_style: dict, run_window_style
         run_window_style.update({"display": "none"})
 
     return config_form_style, run_window_style
+
+
+@callback(
+    Output("hazard-multiple-input", "style"),
+    Output("hazard-single-input", "style"),
+    Input("model-hazard-risk", "value"),
+    State("hazard-multiple-input", "style"),
+    State("hazard-single-input", "style"),
+)
+def toggle_multiple_hazard_input(switch_on, multi_hazard_style, single_hazard_style):
+    single_hazard_style.update({"display": "block"})
+    multi_hazard_style.update({"display": "none"})
+    if switch_on:
+        single_hazard_style.update({"display": "none"})
+        multi_hazard_style.update({"display": "block"})
+        return multi_hazard_style, single_hazard_style
+    return multi_hazard_style, single_hazard_style
+
+
+@callback(
+    Output("hazard-multiple-input", "children"),
+    Input("add-hazard-btn", "n_clicks"),
+    State("hazard-multiple-input", "children"),
+)
+def add_hazard_input(n_clicks, multiple_hazard_children):
+    changed_id = [p["prop_id"] for p in callback_context.triggered][0]
+    if "add-hazard-btn" in changed_id:
+        id = len(multiple_hazard_children)
+        multiple_hazard_children.insert(
+            -1,
+            dbc.Row(
+                [
+                    dbc.Label(f"Hazard file {id}", width=2),
+                    dbc.Col(
+                        [
+                            dbc.Input(
+                                type="text",
+                                placeholder="Enter hazard file path",
+                                id={"type": "multiple-hazard-file-input", "index": id},
+                            ),
+                            dbc.FormText(
+                                "Add a valid path to the hazard file",
+                                style={"display": "none", "color": "red"},
+                                id={"type": "multiple-hazard-file-input-formtext", "index": id},
+                            ),
+                        ],
+                        width=6,
+                    ),
+                    dbc.Col(
+                        file_dialog_btn(btn_id={"type": "multiple-hazard-file-input-dialog", "index": id}),
+                        width=1,
+                    ),
+                    dbc.Label("Return period", width=2),
+                    dbc.Col(dbc.Input(id={"type": "hazard-return-period", "index": id}, type="number")),
+                ],
+                className="mb-3",
+            ),
+        )
+    return multiple_hazard_children
+
+
+@callback(
+    Output({"type": "multiple-hazard-file-input", "index": MATCH}, "value"),
+    Input({"type": "multiple-hazard-file-input-dialog", "index": MATCH}, "n_clicks"),
+)
+def handle_file_dialog_multiple_hazard(n_clicks):
+    changed_id = [p["prop_id"] for p in callback_context.triggered][0]
+    if "multiple-hazard-file-input-dialog" in changed_id:
+        return file_dialog(title="Please select the hazard file", file_types=get_available_grid_exts(), is_file=True)
+    raise PreventUpdate
+
+
+@callback(
+    Output({"type": "multiple-hazard-file-input", "index": MATCH}, "valid"),
+    Output({"type": "multiple-hazard-file-input", "index": MATCH}, "invalid"),
+    Output({"type": "multiple-hazard-file-input-formtext", "index": MATCH}, "style"),
+    Input({"type": "multiple-hazard-file-input", "index": MATCH}, "value"),
+    State({"type": "multiple-hazard-file-input-formtext", "index": MATCH}, "style"),
+)
+def multiple_hazard_formtext(path, formtext_style):
+    return _validate_path_callback(path, formtext_style)
 
 
 def handle_file_dialog(
@@ -85,7 +168,7 @@ def model_hazard_file_fd(fd_btn):
         file_type="grid",
         is_file=True,
         multiple=False,
-        title="Please select the hazard file(s)",
+        title="Please select the hazard file",
     )
 
 
@@ -179,22 +262,28 @@ def validate_vulnerability_file(path, formtext_style):
 
 @callback(
     Output("next-btn", "disabled"),
-    Input("model-output-path", "value"),
+    Input("model-hazard-risk", "value"),
+    Input({"type": "multiple-hazard-file-input", "index": ALL}, "value"),
+    Input({"type": "hazard-return-period", "index": ALL}, "value"),
     Input("model-hazard-file", "value"),
     Input("model-hazard-elevation-reference", "value"),
+    Input("model-output-path", "value"),
     Input("model-exposure-geom", "value"),
     Input("model-exposure-geom-crs", "value"),
     Input("model-exposure-csv", "value"),
     Input("model-vulnerability-file", "value"),
 )
-def enable_next_btn(*args: tuple[str]):
-    return not all(args)
+def enable_next_btn(hazard_risk, multiple_hazard_input, hazard_rps, hazard_file, *args: tuple[str]):
+    if hazard_risk:
+        return not (all(multiple_hazard_input) and all(hazard_rps) and all(args))
+    return not (hazard_file and all(args))
 
 
 @callback(
     Output("model-log-interval", "disabled"),
     Input("next-btn", "n_clicks"),
     Input("model-back-btn", "n_clicks"),
+    Input("model-run-alert", "is_open"),
     State("model-output-path", "value"),
     State("model-output-csv", "value"),
     State("model-output-geom", "value"),
@@ -206,10 +295,13 @@ def enable_next_btn(*args: tuple[str]):
     State("model-exposure-geom-crs", "value"),
     State("model-exposure-csv", "value"),
     State("model-vulnerability-file", "value"),
+    State({"type": "multiple-hazard-file-input", "index": ALL}, "value"),
+    State({"type": "hazard-return-period", "index": ALL}, "value"),
 )
 def create_toml(  # noqa: PLR0913
     next_btn,
     back_btn,
+    model_run_finished,
     ouput_path,
     output_csv,
     output_geom,
@@ -221,25 +313,48 @@ def create_toml(  # noqa: PLR0913
     exposure_geom_crs,
     exposure_csv,
     vulnerability_file,
+    multiple_hazard_files,
+    return_periods,
 ):
     changed_id = [p["prop_id"] for p in callback_context.triggered][0]
     if "next-btn" in changed_id:
-        create_fiat_toml(
-            ouput_path=ouput_path,
-            output_csv=output_csv,
-            output_geom=output_geom,
-            output_grid=output_grid,
-            hazard_file=hazard_file,
-            hazard_elev_ref=hazard_elev_ref,
-            hazard_risk=hazard_risk,
-            exposure_geom=exposure_geom,
-            exposure_geom_crs=exposure_geom_crs,
-            exposure_csv=exposure_csv,
-            vulnerability_file=vulnerability_file,
-        )
+        if hazard_risk:
+            for hazard_fp, rp in zip(multiple_hazard_files, return_periods):
+                config_file = f"return_period_{rp}.toml"
+                create_fiat_toml(
+                    output_path=ouput_path,
+                    output_csv=output_csv,
+                    output_geom=output_geom,
+                    output_grid=output_grid,
+                    hazard_file=hazard_fp,
+                    hazard_elev_ref=hazard_elev_ref,
+                    exposure_geom=exposure_geom,
+                    exposure_geom_crs=exposure_geom_crs,
+                    exposure_csv=exposure_csv,
+                    vulnerability_file=vulnerability_file,
+                    config_file_name=config_file,
+                    rp=rp,
+                )
+        else:
+            create_fiat_toml(
+                output_path=ouput_path,
+                output_csv=output_csv,
+                output_geom=output_geom,
+                output_grid=output_grid,
+                hazard_file=hazard_file,
+                hazard_elev_ref=hazard_elev_ref,
+                exposure_geom=exposure_geom,
+                exposure_geom_crs=exposure_geom_crs,
+                exposure_csv=exposure_csv,
+                vulnerability_file=vulnerability_file,
+            )
         return False
     if "model-back-btn" in changed_id:
         return True
+
+    if model_run_finished:
+        return True
+
     raise PreventUpdate
 
 
@@ -273,8 +388,7 @@ def stream_model_log(n_intervals, run_btn, model_log_disabled, model_log, output
 def start_model(n_clicks, output_path):
     changed_id = [p["prop_id"] for p in callback_context.triggered][0]
     if "model-run-btn" in changed_id:
-        model_config_path = Path(output_path) / "model_config.toml"
         # run model
-        run_model(model_config_path, log_stream=LOG_STRING, log_file=output_path)
+        run_model(output_path, log_stream=LOG_STRING, log_file=output_path)
         return True
     raise PreventUpdate
